@@ -1,0 +1,230 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SIGN UP</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.3.1.min.js"></script>
+    <script type="text/javascript" src="http://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
+    <script type="text/javascript" src="js/d3pie.min.js"></script>
+    <script type="text/javascript" src="js/jqBarGraph.1.1.min.js"></script>
+    <script type="text/javascript" src="js/vis.js"></script>
+    <link href="css/layouts/vis.css" rel="stylesheet" type="text/css" />
+    <!-- // <script type="text/javascript" src="http://cdn.datatables.net/plug-ins/9dcbecd42ad/integration/jqueryui/dataTables.jqueryui.js"></script> -->
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <!-- <link rel="stylesheet" href="http://cdn.datatables.net/plug-ins/9dcbecd42ad/integration/jqueryui/dataTables.jqueryui.css"> -->
+    <link rel="stylesheet" hred="http://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">
+
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css">
+    <![endif]-->
+    <!--[if gt IE 8]><!-->
+        <!-- <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css"> -->
+         <link rel="stylesheet" href="css/layouts/marketing.css"
+    <!--<![endif]-->
+
+
+</head>
+
+<body>
+    <!--
+    Your HTML goes here. Visit purecss.io/layouts/ for some sample HTML code.
+    -->
+    <!-- <p id="demo">Click me.</p> -->
+    <div class="splash-container">
+    <div class="splash">
+    <h1 class="splash-subhead" id="header">
+            Sign Up
+        </h1>
+    <div class="pure-form pure-form-aligned">
+    <input id="accountForm" type="text" placeholder="ACCOUNT" required>
+    <input id="imeiForm" type="text" placeholder="IMEI#" required>
+    </div>   
+    <!-- <form class="pure-form" >
+     <fieldset>
+        <legend>NCTU Assist</legend>
+    <div class="pure-u-1 pure-u-md-1-3">
+    </div> -->
+    <button type="button" class="pure-button" id="signButton">SIGN</button>
+    <div id='status' class="status"></div>
+    
+    <script>
+    // alert(moment(Number(1415967023713)).format("HH:mm"));
+    // alert(moment(Number(1415967023713)).hour());
+    // alert(Number(moment(Number(1415967023713)).minute())/60);
+    // alert(moment(Number(1415967023713)).weekday()); // get week day "5,Friday"
+    // alert(moment(Number(1415967023713)).hours());
+    // alert(moment(Number(1415967023713)).fromNow()); //from now
+    // a=moment();
+    // b=moment(Number(1415800081463));
+    // alert(moment().diff(b,'days')); //differ "3 days"
+    // alert(moment(Number(1415800081463)).weekday());
+
+
+    $("#signButton").unbind().click(function() {
+        $('#status').text("");
+        var accountValue = $('#accountForm').val();
+        var imeiValue = $('#imeiForm').val();
+
+        if( accountValue != "" && imeiValue != "" ){
+            Parse.initialize("x2WX86qsaH5DAf0X3Tbsbd74YbfePFlIIVo63REU", "Ie6uftjeQr59mNHHhSJZyjX2Y5W4qUHVpU9ENiwt");
+            var UserAccount = Parse.Object.extend("Account");
+            var account = $("#accountForm").val();
+            var imei = $("#imeiForm").val();
+
+            checkAccount();
+            // checkAccount(account);
+            // checkIMEI(imei);
+
+            function checkAccount(){
+                var aQuery = new Parse.Query("Account");
+                aQuery.equalTo("account",account);
+                aQuery.find({
+                success: function(results) {
+                    var aExist;
+                    if(results.length == 0){
+                        aExist = 0;
+                    }
+                    else{
+                        aExist = 1;
+                    }
+                    checkIMEI(aExist);
+                    // alert('hiiii');
+                },
+                error: function(error) {
+                    $('#status').text("Somethings error :( ");
+                    // There was an error.
+                    }
+                });
+            }
+
+
+            function checkIMEI(aExist){
+                var iQuery = new Parse.Query("Account");
+                iQuery.equalTo("imei",imei);
+                iQuery.find({
+                success: function(results) {
+
+                    var iExist;
+                    if(results.length == 0){
+                        iExist = 0;
+                    }
+                    else{
+                        iExist = 1;
+                    }
+                    check(aExist,iExist);
+
+                },
+                error: function(error) {
+                    $('#status').text("Somethings error :( ");
+                    // There was an error.
+                    }
+                });
+            }
+
+            function check(a,i){
+                if(a == 0 && i == 0){
+                    var userAccount = new UserAccount();
+                    userAccount.set("account", account);
+                    userAccount.set("imei",imei);
+                    userAccount.save(null, {
+                      success: function(userAccount) {
+                        $('#status').text("Account created ;) ");
+
+                      },
+                      error: function(guserAccount, error) {
+                        $('#status').text("Somethings error :( ");
+
+                      }
+                    });
+                }
+                else{
+                    $('#status').text("account or IMEI#  EXISTs");
+                }
+            }
+                     
+    }
+
+
+    else {
+        $('#status').text("Need Account & IMEI");
+    }
+    });
+    </script>
+
+
+
+    </div>
+    </div>
+
+    </script>
+
+
+    <!-- <br> -->
+    <!-- <div id="myPie" align="center"></div> -->
+
+
+
+
+        <!-- <div class="pure-g">
+            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">    
+                <h3 class="content-subhead" id="text1">
+                    <i class="fa fa-rocket" ></i>
+                    Get Started Quickly
+                </h3>
+                <p>
+                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                </p>
+            </div>
+            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
+                <h3 class="content-subhead">
+                    <i class="fa fa-mobile"></i>
+                    Responsive Layouts
+                </h3>
+                <p>
+                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                </p>
+            </div>
+            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
+                <h3 class="content-subhead">
+                    <i class="fa fa-th-large"></i>
+                    Modular
+                </h3>
+                <p>
+                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                </p>
+            </div>
+            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
+                <h3 class="content-subhead">
+                    <i class="fa fa-check-square-o"></i>
+                    Plays Nice
+                </h3>
+                <p>
+                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                </p>
+            </div>
+        </div> -->
+    </div>
+
+ 
+
+</div>
+   <!--  <div class="splash-container">
+    <div class="splash">
+        <h1 class="splash-head">Big Bold Text</h1>
+        <p class="splash-subhead">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+        </p>
+        <p>
+            <a href="http://purecss.io" class="pure-button pure-button-primary">Get Started</a>
+        </p>
+    </div> -->
+</div>
+</form>
+</body>
+</html>

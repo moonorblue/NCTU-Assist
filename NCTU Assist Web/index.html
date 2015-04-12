@@ -1,0 +1,1278 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>NCTU Assist</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.3.1.min.js"></script>
+    <script type="text/javascript" src="http://cdn.datatables.net/1.10.4/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.4/d3.min.js"></script>
+    <script type="text/javascript" src="js/d3pie.min.js"></script>
+    <script type="text/javascript" src="js/jqBarGraph.1.1.min.js"></script>
+    <script type="text/javascript" src="js/vis.js"></script>
+    <link href="css/layouts/vis.css" rel="stylesheet" type="text/css" />
+    <!-- // <script type="text/javascript" src="http://cdn.datatables.net/plug-ins/9dcbecd42ad/integration/jqueryui/dataTables.jqueryui.js"></script> -->
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <!-- <link rel="stylesheet" href="http://cdn.datatables.net/plug-ins/9dcbecd42ad/integration/jqueryui/dataTables.jqueryui.css"> -->
+    <link rel="stylesheet" hred="http://cdn.datatables.net/1.10.4/css/jquery.dataTables.min.css">
+
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css">
+    <![endif]-->
+    <!--[if gt IE 8]><!-->
+        <!-- <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css"> -->
+         <link rel="stylesheet" href="css/layouts/marketing.css"
+    <!--<![endif]-->
+
+
+</head>
+
+<body>
+    <!--
+    Your HTML goes here. Visit purecss.io/layouts/ for some sample HTML code.
+    -->
+    <!-- <p id="demo">Click me.</p> -->
+    <div class="splash-container">
+    <div class="splash">
+    <h1 class="splash-subhead" id="header">
+            NCTU Assist
+        </h1>
+    <form class="pure-form" >
+    <!--  <fieldset>
+        <legend>NCTU Assist</legend> -->
+    <div class="pure-u-1 pure-u-md-1-3">
+    <input type="imei" placeholder="Account" id="imei" align="center" >
+    </div>
+    <div class="checkbox">
+    <label for="remember">
+            <input id="rem" type="checkbox" name="remember">Remember Account
+        </label>
+    </div>
+    <br>
+    <br>
+    <button type="button" class="pure-button" onclick="myFunction()" id="myButton">SUBMIT</button>
+    <h3>or</h3>
+    <button type="button" class="pure-button" onclick="signFuction()" id="signButton">SIGN UP</button>
+    <script>
+    // alert(moment(Number(1415967023713)).format("HH:mm"));
+    // alert(moment(Number(1415967023713)).hour());
+    // alert(Number(moment(Number(1415967023713)).minute())/60);
+    // alert(moment(Number(1415967023713)).weekday()); // get week day "5,Friday"
+    // alert(moment(Number(1415967023713)).hours());
+    // alert(moment(Number(1415967023713)).fromNow()); //from now
+    // a=moment();
+    // b=moment(Number(1415800081463));
+    // alert(moment().diff(b,'days')); //differ "3 days"
+    // alert(moment(Number(1415800081463)).weekday());
+
+    function signFuction(){
+        window.open("./sign.html", '_blank');
+    }
+
+    function myFunction() {
+        // imei = document.getElementById('obj').value;
+
+
+
+
+        // var imei = $('#imei').val();
+        // var cook = $('#rem').prop('checked');
+
+        // if(cook == true){
+        //     $.cookie('imei', imei);
+        //     $.cookie('checked',true);
+        // }else{
+        //     //clear cookies
+        //     $.cookie('imei', '');
+        //     $.cookie('checked','');
+        // }
+
+        // // sss = document.getElementById('data');
+        // // sss.innerHTML = imei;
+        // $('#data').text("Activity Records : "+$('#imei')[0].value);
+        // xxx = document.getElementById('content_wrapper');
+        // xxx.className = "content-wrapper2";
+        // window.scrollTo(0,1000);
+
+        // alert(sss.innerHTML);
+        // document.getElementById("demo").innerHTML = "YOU CLICKED ME!";
+    }
+    </script>
+    </div>
+    </div>
+    <script>
+    var actPieByAct,actPieByTime,timePieByAct,timeline;
+    var myGraph;
+    var count=0;
+    $(document).ready(function(){
+    $('#rem').prop('checked',$.cookie('checked'));  
+    $('#imei').val($.cookie('imei'));
+
+    dataArray = [];
+    $('#myTable').DataTable({
+        data:dataArray,
+        destroy:true
+    });
+
+    });
+
+    $("#myButton").unbind().click(function() {
+
+    var imei = $('#imei').val();
+    var cook = $('#rem').prop('checked');
+    if(cook == true){
+        $.cookie('imei', imei);
+        $.cookie('checked',true);
+    }else{
+         //clear cookies
+        $.cookie('imei', '');
+        $.cookie('checked','');
+    }
+        
+
+    $('#data').text("Activity Records : "+$('#imei')[0].value);
+    xxx = document.getElementById('content_wrapper');
+    
+
+
+    Parse.initialize("x2WX86qsaH5DAf0X3Tbsbd74YbfePFlIIVo63REU", "Ie6uftjeQr59mNHHhSJZyjX2Y5W4qUHVpU9ENiwt");
+    var UserAccount = Parse.Object.extend("Account");
+    var userid;
+    var account = $('#imei').val();
+    var Query = new Parse.Query("Account");
+    Query.equalTo("account",account);
+    Query.find({
+              success: function(results) {
+                if(results.length == 1){
+                    userid = results[0].get('imei');
+                    mainWithIMEI(userid);
+                }
+              },
+              error: function(error) {
+                // There was an error.
+                }
+    });
+
+    function mainWithIMEI(id) {
+
+    // Parse.initialize("x2WX86qsaH5DAf0X3Tbsbd74YbfePFlIIVo63REU", "Ie6uftjeQr59mNHHhSJZyjX2Y5W4qUHVpU9ENiwt");
+    var UserActivities = Parse.Object.extend("UserActivities");
+
+    getAllData();
+
+
+    function getAllData() {
+
+        var result = [];
+        var processCallback = function(res) {
+            result = result.concat(res);
+            if (res.length === 1000) {
+              process(res[res.length-1].id);
+              return;
+            }
+
+    // do something about the result, result is all the object you needed.
+    // status.success("final length " + result.length);
+    // alert("final length " + result.length);
+    // alert(result[0].get('ActivityChose'));
+            inMain(result);
+        }
+    
+        var process = function(skip) {
+        // var query = new Parse.Query("NewsArticle");
+        var query = new Parse.Query(UserActivities);
+        query.equalTo("UserID", id);
+        if (skip) {
+            console.log("in if");
+            query.greaterThan("objectId", skip);
+        }
+        query.limit(1000);
+        query.ascending("objectId");
+        query.find().then(function querySuccess(res) {
+            processCallback(res);
+        }, function queryFailed(reason) {
+      // status.error("query unsuccessful, length of result " + result.length + ", error:" + error.code + " " + error.message);
+        });
+        }
+        
+        process(false);
+
+    };
+
+
+    function inMain(res){
+
+    results = res;
+    // var query = new Parse.Query(UserActivities);
+    // query.limit(10000);
+    // var userid = $("#imei")[0].value;
+    // query.equalTo("UserID", id);//"355026051312078"
+    // query.limit = 100000;
+    // query.find({
+     // success: function(results) {
+
+    var dataArray =[];
+    var rawArray =[];
+    var dayActArray = [];
+    var x = 0;
+    rawArray = results;
+    for (var i = results.length-1; i > 0; i--) { 
+      var object = results[i];
+      var attr = [];
+      var attrForDay = [];
+      attr[0] = object.get('ActivityChose');
+      // attr[1] = moment(Number(object.get('AskedTime'))).format("HH:mm:ss, MMM D YYYY, ddd");
+      attr[1] = Number(object.get('AskedTime'));
+      attr[2] = moment(Number(object.get('AnsweredTime'))).format("HH:mm:ss, MMM D YYYY, ddd");
+      // attr[3] = moment.duration(Number(object.get('WaitPeriod'))).asSeconds();
+      attr[3] = msToTime(Number(object.get('WaitPeriod')));
+      // alert(msToTime(Number(object.get('WaitPeriod'))));
+
+      attrForDay[0] = object.get('ActivityChose');
+      attrForDay[1] = moment(Number(object.get('AskedTime'))).format("MMMDYYYY");
+      attrForDay[2] = object.get('AskedTime');
+
+      dataArray[x] = attr;
+      dayActArray[x] = attrForDay;
+      x++;
+    }
+
+    dataArray.sort(function(a,b){
+    // to get a value that is either negative, positive, or zero.
+    return b[1]- a[1];
+    });
+
+    for(var x = 0; x < results.length-1 ; x++) { 
+    // console.log(dataArray[x][1]);
+    dataArray[x][1] = moment(dataArray[x][1]).format("HH:mm:ss, MMM D YYYY, ddd");
+    console.log(dataArray[x][1]);
+
+    }
+    
+
+    function msToTime(duration) {
+    var milliseconds = parseInt((duration%1000)/100)
+        , seconds = parseInt((duration/1000)%60)
+        , minutes = parseInt((duration/(1000*60))%60)
+        , hours = parseInt((duration/(1000*60*60))%24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
+    }
+    // alert(dataArray);
+
+
+
+  //   var data = new vis.DataSet([
+  //   {
+  //     'start': new Date(2012,7,19),
+  //     'content': 'default'
+  //   },
+  //   {
+  //     'start': new Date(2012,7,23),
+  //     'content': 'green',
+  //     'className': 'green'
+  //   },
+  //   {
+  //     'start': new Date(2012,7,29),
+  //     'content': 'red',
+  //     'className': 'red'
+  //   },
+  //   {
+  //     'start': new Date(2012,7,27),
+  //     'end': new Date(2012,8,1),
+  //     'content': 'orange',
+  //     'className': 'orange'
+  //   },
+  //   {
+  //     'start': new Date(2012,8,2),
+  //     'content': 'magenta',
+  //     'className': 'magenta'
+  //   }
+  // ]);
+
+    data = getDayAct('all');
+
+
+  // specify options
+    var options = {editable: false,
+                   selectable: true,
+                    zoomable:false,
+                    width:'85%',
+                    align:'center',
+                    margin:{
+                        item:0
+                    }
+
+
+     };
+
+  // create the timeline
+    var container = document.getElementById('mytimeline');
+    if(timeline != null){
+        timeline.destroy();
+        timeline = null;
+    }   
+
+    timeline = new vis.Timeline(container, data, options);
+
+
+
+    function getDayAct(act){
+
+        DatesArray = countDate(dayActArray);
+        DayActsArray = putActivity(DatesArray,dayActArray);
+
+        myDataArray = [];
+        var x,y,z;
+
+        for(x in DayActsArray){
+            ary = DayActsArray[x];
+            // alert(ary);
+            for( y in ary){
+                obj = ary[y];
+                if( act == 'all' ){
+                    data = {'start':moment(Number(obj[2])).format('YYYY-MM-DD'),'content':obj[0][0],'className':obj[0]};
+                    myDataArray.push(data);
+                }
+                else if( act == obj[0]){
+                    data = {'start':moment(Number(obj[2])).format('YYYY-MM-DD'),'content':obj[0][0],'className':obj[0]};
+                    myDataArray.push(data);
+                }
+
+
+            }
+        }
+
+
+
+        return myDataArray;
+    }
+
+    function countDate(inArray){
+        var Dates=[];
+        var x;
+        for (x in inArray ){
+            if($.inArray(inArray[x][1],Dates) == -1){
+                Dates.push(inArray[x][1]);
+            }
+        }
+        return Dates;
+
+    }
+
+    function putActivity(Dates,inArray){
+
+        DayAct=[];
+        var x,y;
+        // var dayactivity = { date:''}
+        for (x in Dates){
+            DayAct[Dates[x]] = [];
+            for ( y in inArray){
+                if(Dates[x] == inArray[y][1]){
+                    DayAct[Dates[x]].push(inArray[y]);
+                }
+            }
+            // DayAct[Dates[x]].reverse();
+            // alert(DayAct[Dates[x]]);
+            // alert(ActivityCount[countType[x]]);
+        }
+        return DayAct;
+    }
+
+    $('#myTable').DataTable({
+        data:dataArray,
+        destroy:true,
+        ordering: false
+    });
+
+    // var container = $('html, body'),
+        // scrollTo = $('#header');
+    // alert("hi");
+    // container.animate({
+    // scrollTop: scrollTo.offset().top - container.offset().top + container.scrollTop()});​
+    $("html, body").animate({ scrollTop:$( window ).height() - $('#imei').position().top}, "slow");
+    // alert($('#header').offset().top);
+    // alert($( window ).height());
+    // alert($("html, body").offset().top);
+    // $("html, body").animate({ scrollTop: 100 }, "slow");
+    // return false;
+    // var pie;
+
+    // countActivity();
+
+    // alert($.inArray('a',ActivityType));
+    // for (x in ActivityType){
+    //      alert(ActivityType[x]);
+    // }
+    // ActivityCount=[];
+    ActivityType = countType(dataArray);
+    ActivityCount = countActivity(ActivityType,dataArray);
+
+    function countType(inputArray){
+        ActivityType=[];
+        var x;
+        for (x in inputArray ){
+            if($.inArray(inputArray[x][0],ActivityType) == -1){
+                ActivityType.push(inputArray[x][0]);
+            }
+        }
+        return ActivityType;
+
+    }
+    function countActivity(countType,inputArray){
+        // ActivityType=[];
+        ActivityCount=[];
+        var x,y;
+
+        for (x in countType){
+            ActivityCount[countType[x]] = 0;
+            for ( y in inputArray){
+                if(countType[x] == inputArray[y][0]){
+                    ActivityCount[countType[x]]++;
+                }
+            }
+            // alert(ActivityCount[countType[x]]);
+        }
+        return ActivityCount;
+    }
+
+
+    // getPieData(ActivityCount);
+    function getPieData(count){
+        // var obj; // { label: "label", value: 1.5 }
+        var dArray=[];
+        var keys = Object.keys(count);
+        var x;
+
+        // alert("hi");
+        for(x in keys){
+            var labelData = keys[x] + ":" +count[keys[x]];
+            var colorCode = getColorCode(keys[x]);
+            var dataObj = {label:labelData,value:count[keys[x]],color:colorCode}; // { label: "label", value: 1.5 }
+            // dataObj['label'] = keys[x];
+            // dataObj['value'] = count[keys[x]];
+            dArray[x] = dataObj;
+            // alert(keys[x]+"  "+count[keys[x]]);
+        }
+
+        return dArray;
+
+    }
+
+    function getColorCode(obj){
+
+        switch(obj){
+            case 'Working':
+                return "#2484c1";
+                break;
+            case 'Entertainment':
+                return "#65a620";
+                break;
+            case 'Sporting':
+                return "#7b6888";
+                break;
+            case 'Dining':
+                return "#a05d56";
+                break;
+            case 'Transportation':
+                return "#961a1a";
+                break;
+            case 'Shopping':
+                return "#d8d23a";
+                break;
+            case 'Monday':
+                return "#e98125";
+                break;
+            case 'Tuesday':
+                return "#d0743c";
+                break;
+            case 'Wednesday':
+                return "#635222";
+                break;
+            case 'Thursday':
+                return "#6ada6a";
+                break;
+            case 'Friday':
+                return "#0c6197";
+                break;
+            case 'Saturday':
+                return "#7d9058";
+                break;
+            case 'Sunday':
+                return "#207f33";
+                break;
+            default:
+                return "#BDBDBD"
+                break;
+        }
+
+
+
+
+    }
+
+    pieDataAll = getPieData(ActivityCount);
+
+    $("#selAct").val("all");
+    $("#selTime").val("all");
+    $("#selType").val("all");
+    // $("#selAct option[text='all']").attr("selected", true); 
+
+    if (actPieByAct != null){
+        actPieByAct.destroy();
+        actPieByAct = null;
+    }
+    if (actPieByTime != null){
+        actPieByTime.destroy();
+        actPieByTime = null;
+    }
+    if (timePieByAct != null){
+        timePieByAct.destroy();
+        timePieByAct = null;
+    }
+
+    actPieByAct = mkNewPie("actPieByAct",pieDataAll); //make actPie by Act
+    actPieByTime = mkNewPie("actPieByTime",pieDataAll); // make actPie by Time
+    timePieByAct = mkNewPie("timePieByAct",dataByActsType("all")); // make timePie by Act
+
+    function mkNewPie(pieID,data){
+    var pie;
+    pie =  new d3pie(pieID, {
+
+    header: {
+        title: {
+            // text: "CHART",
+            color:"#34495e",
+            fontSize:40
+        },
+        location: "top-center",
+        titleSubtitlePadding: 8
+    },
+    size: {
+        canvasHeight: 550,
+        canvasWidth: 1000,
+        pieInnerRadius: 0,
+        pieOuterRadius: 200
+    },
+    data: {
+        content: data
+    },
+    labels: {
+        outer: {
+            format: "label",
+            hideWhenLessThanPercentage: null,
+            pieDistance: 30
+        },
+        inner: {
+            format: "percentage",
+            hideWhenLessThanPercentage: null
+        },
+        mainLabel: {
+            color: "#333333",
+            font: "arial",
+            fontSize: 30
+        },
+        percentage: {
+            color: "#dddddd",
+            font: "arial",
+            fontSize: 20,
+            decimalPlaces: 1
+        },
+        value: {
+            color: "#cccc44",
+            font: "arial",
+            fontSize: 30
+        },
+        lines: {
+            enabled: true,
+            style: "straight",
+            color: "segment" // "segment" or a hex color
+        }
+    }
+    });
+
+    return pie;
+    }
+
+    function dataByActs(count){
+        var x=0;
+        var darray=[];
+        
+        if(count == 0){
+            count = rawArray.length-1;
+        }
+        
+        for (var i = rawArray.length-1; i > 0; i--) { 
+        var object = rawArray[i];
+        var attr = [];
+        attr[0] = object.get('ActivityChose');
+        darray[x]=attr;
+        x++;
+        if(x>count){
+            break;
+        }
+        }
+
+        ActivityType = countType(darray);
+        ActivityCount = countActivity(ActivityType,darray);
+        return getPieData(ActivityCount);
+
+    }
+    
+
+
+    function dataByDaysAgo(days,start,end){
+        var darray=[];
+        var x=0;
+        // alert(days+":"+start+":"+end);
+        // if(count == 0){
+        //     count = rawArray.length-1;
+        // }
+        // if(days == 0){
+        //     darray = dataArray;
+        // }
+        // else{
+        for (var i = rawArray.length-1; i > 0; i--) { 
+        var object = rawArray[i];
+        var time = Number(object.get('AskedTime'));
+        var day = moment().diff(time,'days');
+        var hour = moment(time).hours();
+        if(start == 0 && end == 0){
+            if(day <= days ){
+            var attr = [];
+            attr[0] = object.get('ActivityChose');
+            darray[x]=attr;
+            x++;
+            }
+        }
+        else{
+            if(day <= days && ( hour >= start && hour < end) ){
+            var attr = [];
+            attr[0] = object.get('ActivityChose');
+            darray[x]=attr;
+            x++;
+        }
+
+        }
+        };
+        // }
+
+        ActivityType = countType(darray);
+        ActivityCount = countActivity(ActivityType,darray);
+        return getPieData(ActivityCount);
+
+    }
+
+    function dataByDayType(type,start,end){
+        var darray=[];
+        var x=0;
+     
+        switch(type){
+
+            case 'day':
+                for (var i = rawArray.length-1; i > 0; i--) { 
+                    var object = rawArray[i];
+                    var time = Number(object.get('AskedTime'));
+                    var day = moment(time).weekday();
+                    var hour = moment(time).hours();
+                    if(start == 0 && end == 0){
+                        if(day <= 5 ){
+                            var attr = [];
+                            attr[0] = object.get('ActivityChose');
+                            darray[x]=attr;
+                            x++;
+                        }
+                    }
+                    else{
+                        if(day <= 5 && ( hour >= start && hour < end) ){
+                            var attr = [];
+                            attr[0] = object.get('ActivityChose');
+                            darray[x]=attr;
+                            x++;
+                        }
+                    }
+                };
+                break;
+            case 'end':
+                for (var i = rawArray.length-1; i > 0; i--) { 
+                    var object = rawArray[i];
+                    var time = Number(object.get('AskedTime'));
+                    var day = moment(time).weekday();
+                    var hour = moment(time).hours();
+                    if(start == 0 && end == 0){
+                        if((day == 6 || day == 0)){
+                            var attr = [];
+                            attr[0] = object.get('ActivityChose');
+                            darray[x]=attr;
+                            x++;
+                        }
+                    }
+                    else{
+                        if((day == 6 || day == 0) &&  ( hour >= start && hour < end) ){
+                            var attr = [];
+                            attr[0] = object.get('ActivityChose');
+                            darray[x]=attr;
+                            x++;
+                        }
+                    }
+                };
+                break;
+        }
+        ActivityType = countType(darray);
+        ActivityCount = countActivity(ActivityType,darray);
+        return getPieData(ActivityCount);
+
+    }
+
+    function dataByWeekDay(day,start,end){
+        var darray=[];
+        var x = 0;
+        var num = dayToNum(day);
+        // alert(moment(Number(1416137856569)).weekday());
+        for (var i = rawArray.length-1; i > 0; i--) { 
+            var object = rawArray[i];
+            var time = Number(object.get('AskedTime'));
+            var day = moment(time).weekday();
+            var hour = moment(time).hours();
+            if(start == 0 && end == 0){
+                if(day ==  num ){
+                    var attr = [];
+                    attr[0] = object.get('ActivityChose');
+                    darray[x]=attr;
+                    x++;
+                }
+            }
+            else{
+                if(day ==  num && ( hour >= start && hour < end) ){
+                    var attr = [];
+                    attr[0] = object.get('ActivityChose');
+                    darray[x]=attr;
+                    x++;
+                }
+            }
+        };
+        ActivityType = countType(darray);
+        ActivityCount = countActivity(ActivityType,darray);
+
+        return getPieData(ActivityCount);
+
+
+    }
+
+    function dayToNum(day){
+        switch(day){
+            case 'mon':
+                return 1;
+                break;
+            case 'tue':
+                return 2;
+                break;
+            case 'wed':
+                return 3;
+                break;
+            case 'thu':
+                return 4;
+                break;
+            case 'fri':
+                return 5;
+                break;
+            case 'sat':
+                return 6;
+                break;
+            case 'sun':
+                return 0;
+                break;
+        }
+    }
+
+    function dataByActsType(actType){
+        var darray=[];
+        var x = 0;
+        // alert(rawArray.length);
+        if(actType == 'all'){
+        for (var i = rawArray.length-1; i > 0; i--) { 
+            var object = rawArray[i];
+            var act = object.get('ActivityChose');
+            var attr = [];
+            attr[0] = moment(Number(object.get('AskedTime'))).format("dddd");
+            darray[x]=attr;
+            x++;
+        };
+        }
+        else{
+            for (var i = rawArray.length-1; i > 0; i--) { 
+            var object = rawArray[i];
+            var act = object.get('ActivityChose');
+            if(act ==  actType ){
+                var attr = [];
+                attr[0] = moment(Number(object.get('AskedTime'))).format("dddd");
+                darray[x]=attr;
+                x++;
+            };
+            }  
+        }
+   
+        ActivityType = countType(darray);
+        ActivityCount = countActivity(ActivityType,darray);
+        return getPieData(ActivityCount);
+    }
+
+    $('#selAct').unbind().change(
+        function() {
+            var select = $("#selAct option:selected").val();
+            var pieData;    
+            switch(select){
+                case 'all':
+                    pieData = dataByActs(0);
+                    break;
+                case '10':
+                    pieData = dataByActs(10);
+                    break;
+                case '50':
+                    pieData = dataByActs(50);
+                    break;
+                case '100':
+                    pieData = dataByActs(100);
+                    break;
+
+            }
+            //change data array
+
+            if (actPieByAct != null){
+                actPieByAct.destroy();
+                actPieByAct = null;
+            };
+
+            // if pieData is empty , alert !!
+            if(pieData.length == 0){
+                alert("No such data :(");
+                pieData=[{label:"No Data", value:1 , color:'#BDBDBD'}];
+            };
+            actPieByAct = mkNewPie("actPieByAct",pieData); 
+
+    }
+    );
+
+    // $('#selTime').unbind().change(
+    $('#TimeButton').unbind().click(
+        function() {
+            var select = $("#selTime option:selected").val();
+            var start = Number($("#selStartTime option:selected").val());
+            var end = Number($("#selEndTime option:selected").val());
+            var pieData;
+            //change data array
+            switch(select){
+                case 'all':
+                    pieData = dataByDaysAgo(999,start,end);
+                    break;
+                case '3':
+                    pieData = dataByDaysAgo(3,start,end);
+                    break;
+                case '7':
+                    pieData = dataByDaysAgo(7,start,end);
+                    break;
+                case '14':
+                    pieData = dataByDaysAgo(14,start,end);
+                    break;
+                case '30':
+                    pieData = dataByDaysAgo(30,start,end);
+                    break;
+                case 'day':
+                    pieData = dataByDayType('day',start,end);
+                    break;
+                case 'end':
+                    pieData = dataByDayType('end',start,end);
+                    break;
+                case 'mon':
+                    pieData = dataByWeekDay('mon',start,end);
+                    break;
+                case 'tue':
+                    pieData = dataByWeekDay('tue',start,end);
+                    break;
+                case 'wed':
+                    pieData = dataByWeekDay('wed',start,end);
+                    break;
+                case 'thu':
+                    pieData = dataByWeekDay('thu',start,end);
+                    break;
+                case 'fri':
+                    pieData = dataByWeekDay('fri',start,end);
+                    break;
+                case 'sat':
+                    pieData = dataByWeekDay('sat',start,end);
+                    break;
+                case 'sun':
+                    pieData = dataByWeekDay('sun',start,end);
+                    break;
+
+            }
+            if (actPieByTime != null){
+                actPieByTime.destroy();
+                actPieByTime = null;
+            }
+            if(pieData.length == 0){
+                alert("No such data :(");
+                pieData=[{label:"No Data", value:1, color:'#BDBDBD'}];
+            };
+            actPieByTime = mkNewPie("actPieByTime",pieData);
+    }
+    );
+
+    $('#selType').unbind().change(
+        function() {
+            var select = $("#selType option:selected").val();
+            // alert(select);
+            var pieData=[];
+            //change data array
+            switch(select){
+                case 'all':
+                    pieData = dataByActsType("all");
+                    break;
+                case 'working':
+                    pieData = dataByActsType("Working");
+                    break;
+                case 'entertainment':
+                    pieData = dataByActsType("Entertainment");
+                    break;
+                case 'sporting':
+                    pieData = dataByActsType("Sporting");
+                    break;
+                case 'dining':
+                    pieData = dataByActsType("Dining");
+                    break;
+                case 'transportation':
+                    pieData = dataByActsType("Transportation");
+                    break;
+                case 'shopping':
+                    pieData = dataByActsType("Shopping");
+                    break;
+
+            }
+            if (timePieByAct != null){
+                timePieByAct.destroy();
+                timePieByAct = null;
+            }
+            if(pieData.length == 0){
+                alert("No such data :(");
+                pieData=[{label:"No Data", value:1, color:'#BDBDBD'}];
+            };
+            timePieByAct = mkNewPie("timePieByAct",pieData);
+    }
+    );
+    $('#selTypeTimeLine').unbind().change(
+        function() {
+            var select = $("#selTypeTimeLine option:selected").val();
+            // alert(select);
+            var timeLineData=[];
+            //change data array
+            switch(select){
+                case 'all':
+                    timeLineData = getDayAct("all");
+                    break;
+                case 'working':
+                    timeLineData = getDayAct("Working");
+                    break;
+                case 'entertainment':
+                    timeLineData = getDayAct("Entertainment");
+                    break;
+                case 'sporting':
+                    timeLineData = getDayAct("Sporting");
+                    break;
+                case 'dining':
+                    timeLineData = getDayAct("Dining");
+                    break;
+                case 'transportation':
+                    timeLineData = getDayAct("Transportation");
+                    break;
+                case 'shopping':
+                    timeLineData = getDayAct("Shopping");
+                    break;
+
+            }
+            if (timeline != null){
+                timeline.destroy();
+                timeline = null;
+            }
+            if(timeLineData.length == 0){
+                alert("No such data :(");
+                // timeLineData=[{label:"No Data", value:1, color:'#BDBDBD'}];
+                timeLineData = [];
+            };
+
+            timeline = new vis.Timeline(container, timeLineData, options);
+    }
+    );
+    if(myGraph != null){
+        // alert("!= null");
+        // myGraph.destroy();
+        myGraph.hide().html(data).fadeIn('fast');
+
+    }
+
+    // myGraph = mkNewGraph('#divForGraph',arrayOfData);
+
+    // graph = $('#divForGraph');
+
+    // $('#divForGraph').jqBarGraph({ data: arrayOfData,
+    //                                barSpace: 0
+    //                                 });  
+    
+    // alert(arrayOfData);
+    count++;
+
+    function mkNewGraph(graphID,data){
+    var graph;
+    graph = $(graphID);
+    graph.jqBarGraph({ data: data,
+                                   barSpace: 0
+                                    });
+    return graph;
+
+    }  
+    // }
+     // },
+    //  error: function(error) {
+    //  alert("Error: " + error.code + " " + error.message);
+    //  }
+    // });
+    
+    };
+
+    };
+    });
+    </script>
+
+    <div class="content-wrapper" id="content_wrapper">
+    <div class="content">
+    <br>
+    <br>
+    <h2 class="content-head is-center" id="data">Activity Records : </h2>
+    <br>
+    <h2 class="content-head2 is-center" id="table">Timeline</h2>
+    <br> <div id="sel1" align="center" class="drawBy">
+    *Draw Timeline by  
+    <select id='selTypeTimeLine'>
+    <option value="all">All activities</option>
+    <option value="working">Working</option>
+    <option value="entertainment">Entertainment</option>
+    <option value="sporting">Sporting</option>
+    <option value="dining">Dining</option>
+    <option value="transportation">Transportation</option>
+    <option value="shopping">Shopping</option>
+    </select>
+    <br>
+    <br>    
+    <div id="mytimeline" align="center"></div>
+    <br>
+    <br>
+    <h2 class="content-head2 is-center" id="table">PIE CHART</h2>
+    <br>
+    <!-- <h2 class="content-head3 is-center" id="table">CHART</h2> -->
+    
+     <div id="sel1" align="center" class="drawBy">
+
+    *Draw chart by  
+    <select id='selAct'>
+    <option value="all">All Activities</option>
+    <option value="10">Last 10 Activities</option>
+    <option value="50">Last 50 Activities</option>
+    <option value="100">Lats 100 Activities</option>
+    </select>
+
+    <div id="actPieByAct" ></div>
+    <br>
+    <br>
+    <br>
+    <br>
+    *Draw chart by  
+    <select id='selTime'>
+    <option value="all">All Days</option>
+    <option value="3">Last 3 Days</option>
+    <option value="7">Last 7 Days</option>
+    <option value="14">Last 14 Days</option>
+    <option value="30">Lats 30 Days</option>
+    <option value="day">Weekday</option>
+    <option value="end">Weekend</option>
+    <option value="mon">Monday</option>
+    <option value="tue">Tuesday</option>
+    <option value="wed">Wednesday</option>
+    <option value="thu">Thursday</option>
+    <option value="fri">Friday</option>
+    <option value="sat">Saturday</option>
+    <option value="sun">Sunday</option>
+
+
+    </select>
+    
+
+    <select id='selStartTime'>
+    <option value="0">00:00</option>
+    <option value="1">01:00</option>
+    <option value="2">02:00</option>
+    <option value="3">03:00</option>
+    <option value="4">04:00</option>
+    <option value="5">05:00</option>
+    <option value="6">06:00</option>
+    <option value="7">07:00</option>
+    <option value="8">08:00</option>
+    <option value="9">09:00</option>
+    <option value="10">10:00</option>
+    <option value="11">11:00</option>
+    <option value="12">12:00</option>
+    <option value="13">13:00</option>
+    <option value="14">14:00</option>
+    <option value="15">15:00</option>
+    <option value="16">16:00</option>
+    <option value="17">17:00</option>
+    <option value="18">18:00</option>
+    <option value="19">19:00</option>
+    <option value="20">20:00</option>
+    <option value="21">21:00</option>
+    <option value="22">22:00</option>
+    <option value="23">23:00</option>
+
+    </select>    
+    -
+    <select id='selEndTime'>
+    <option value="0">00:00</option>
+    <option value="1">01:00</option>
+    <option value="2">02:00</option>
+    <option value="3">03:00</option>
+    <option value="4">04:00</option>
+    <option value="5">05:00</option>
+    <option value="6">06:00</option>
+    <option value="7">07:00</option>
+    <option value="8">08:00</option>
+    <option value="9">09:00</option>
+    <option value="10">10:00</option>
+    <option value="11">11:00</option>
+    <option value="12">12:00</option>
+    <option value="13">13:00</option>
+    <option value="14">14:00</option>
+    <option value="15">15:00</option>
+    <option value="16">16:00</option>
+    <option value="17">17:00</option>
+    <option value="18">18:00</option>
+    <option value="19">19:00</option>
+    <option value="20">20:00</option>
+    <option value="21">21:00</option>
+    <option value="22">22:00</option>
+    <option value="23">23:00</option>
+
+    </select>   
+
+    <button type="button" id="TimeButton">Draw</button>
+    <div id="actPieByTime" ></div>
+    <br>
+    <br>
+    <br>
+    <br>
+    Draw Weekday chart by  
+    <select id='selType'>
+    <option value="all">All activities</option>
+    <option value="working">Working</option>
+    <option value="entertainment">Entertainment</option>
+    <option value="sporting">Sporting</option>
+    <option value="dining">Dining</option>
+    <option value="transportation">Transportation</option>
+    <option value="shopping">Shopping</option>
+    </select>
+
+    <div id="timePieByAct" ></div>
+
+
+
+     </div> 
+     <br>
+    <br>
+    <br>
+    <br>
+
+
+
+        <h2 class="content-head2 is-center" id="table">TABLE</h2>
+        <table id="myTable" align="center">
+    <thead>
+        <tr>
+            <th>Activity</th>
+            <th>Asked Time</th>
+            <th>Answered Time</th>
+            <th>Waiting Time</th>
+
+
+        </tr>
+
+    </thead>
+    
+</table>
+    <!-- <br> -->
+    <!-- <div id="myPie" align="center"></div> -->
+
+
+
+
+        <!-- <div class="pure-g">
+            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">    
+                <h3 class="content-subhead" id="text1">
+                    <i class="fa fa-rocket" ></i>
+                    Get Started Quickly
+                </h3>
+                <p>
+                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                </p>
+            </div>
+            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
+                <h3 class="content-subhead">
+                    <i class="fa fa-mobile"></i>
+                    Responsive Layouts
+                </h3>
+                <p>
+                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                </p>
+            </div>
+            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
+                <h3 class="content-subhead">
+                    <i class="fa fa-th-large"></i>
+                    Modular
+                </h3>
+                <p>
+                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                </p>
+            </div>
+            <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-4">
+                <h3 class="content-subhead">
+                    <i class="fa fa-check-square-o"></i>
+                    Plays Nice
+                </h3>
+                <p>
+                    Phasellus eget enim eu lectus faucibus vestibulum. Suspendisse sodales pellentesque elementum.
+                </p>
+            </div>
+        </div> -->
+    </div>
+
+ 
+
+</div>
+   <!--  <div class="splash-container">
+    <div class="splash">
+        <h1 class="splash-head">Big Bold Text</h1>
+        <p class="splash-subhead">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+        </p>
+        <p>
+            <a href="http://purecss.io" class="pure-button pure-button-primary">Get Started</a>
+        </p>
+    </div> -->
+</div>
+</form>
+</body>
+</html>
